@@ -1,0 +1,40 @@
+.panelLeft {
+   margin: 16px;
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+   padding: 16px;
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 260px;
+   background: rgba(255, 255, 255, 0.92);
+   backdrop-filter: blur(6px);
+   border-radius: 12px;
+   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+   z-index: 1000;
+}
+
+@media (max-width: 480px) {
+   .panelLeft {
+      width: calc(100vw - 56px);
+   }
+}
+
+::-webkit-scrollbar {
+   width: 8px;
+   height: 0px;
+}
+
+::-webkit-scrollbar-track {
+   background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+   border-radius: 4px;
+   background: #CCCCCC;
+}
+
+::-webkit-scrollbar-thumb:hover {
+   background: #555555;
+}

@@ -1,0 +1,36 @@
+.custom-loader-panel {
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   width: 100vw;
+   height: 100vh;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   background-color: rgba(255, 255, 255, 0.35);
+   backdrop-filter: blur(2px);
+   z-index: 1500;
+}
+
+.custom-loader {
+   --d: 44px;
+   width: 16px;
+   height: 16px;
+   border-radius: 50%;
+   color: #000077;
+   box-shadow:
+      calc(1*var(--d)) calc(0*var(--d)) 0 0,
+      calc(0.707*var(--d)) calc(0.707*var(--d)) 0 1px,
+      calc(0*var(--d)) calc(1*var(--d)) 0 2px,
+      calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 3px,
+      calc(-1*var(--d)) calc(0*var(--d)) 0 4px,
+      calc(-0.707*var(--d)) calc(-0.707*var(--d)) 0 5px,
+      calc(0*var(--d)) calc(-1*var(--d)) 0 6px;
+   animation: s7 1s infinite steps(8);
+}
+
+@keyframes s7 {
+   100% {
+      transform: rotate(1turn)
+   }
+}
