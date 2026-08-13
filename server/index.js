@@ -25,15 +25,15 @@ app.use(compression())
 app.use(express.json())
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true)
-    }
-    return callback(new Error('Not allowed by CORS'))
+    // }
+    // return callback(new Error('Not allowed by CORS'))
   }
 }))
 app.use(limiter)
 app.use('/api/eleicao/2014/presidente/primeiro-turno/estados/', router)
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Server starting on port ${process.env.PORT || 5000}!`)
+app.listen(process.env.PORT || 5036, () => {
+  console.log(`Server starting on port ${process.env.PORT || 5036}!`)
 })
