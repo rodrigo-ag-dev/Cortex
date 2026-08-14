@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FeatureGroup, GeoJSON, MapContainer } from 'react-leaflet'
 import { partidoList } from '../../../../common/lists.mjs'
 import Filter, { getUfValue } from '../Filters/Index.jsx'
@@ -15,9 +15,7 @@ function Mapa({ id }) {
   const [partido, setPartido] = useState(null)
   const [loading, setLoading] = useState(false)
   const [geoJSON, setGeoJSON] = useState(null)
-  const [dataJSON, setDataJSON] = useState(null)
   const [dataVote, setdataVote] = useState(null)
-  const [refresh, setRefresh] = useState(0)
   const mapRef = useRef()
 
   const getColor = useCallback(() => {
@@ -29,19 +27,31 @@ function Mapa({ id }) {
     return color
   }, [partido])
 
+  const voteById = useMemo(() => {
+    const map = new Map()
+    if (dataVote) {
+      dataVote.forEach(e => map.set(e.id, e))
+    }
+    return map
+  }, [dataVote])
+
+  const opacityById = useMemo(() => {
+    const map = new Map()
+    if (dataVote && dataVote.length) {
+      dataVote.forEach((e, i) => map.set(e.id, i / dataVote.length))
+    }
+    return map
+  }, [dataVote])
+
   const getTooltip = useCallback(({ dados }) => {
     let tooltip = `<div>${dados.name} - ${dados.uf}</div>`
     if (partido) {
-      let vote = 0
-      dataVote.forEach(e => {
-        if (e.id == dados.id)
-          vote += e.vote
-      })
+      const vote = voteById.get(dados.id)?.vote ?? 0
       tooltip += `<div class='map-tooltip-value'>${vote.toLocaleString('pt-BR')}</div>`
       tooltip = `<div>${tooltip}</div>`
     }
     return tooltip
-  }, [partido, dataVote])
+  }, [partido, voteById])
 
   const onEachState = useCallback((feature, layer) => {
     const fillColor = partido ? getColor() : '#D6DAC2'
@@ -52,7 +62,7 @@ function Mapa({ id }) {
 
     layer.on('mouseout', function () {
       const { id } = feature.properties.dados
-      const fillOpacity = getOpacityByVote({ dataVote, id })
+      const fillOpacity = getOpacityByVote({ opacityById, id })
       this.setStyle({ fillColor, fillOpacity })
     })
 
@@ -64,40 +74,38 @@ function Mapa({ id }) {
     })
 
     const { id } = feature.properties.dados
-    const fillOpacity = getOpacityByVote({ dataVote, id })
+    const fillOpacity = getOpacityByVote({ opacityById, id })
     layer.setStyle({ fillColor, fillOpacity, weight: uf ? .2 : .5, color: '#000000' });
     layer.bindTooltip(getTooltip(feature.properties), { direction: 'top', sticky: true })
-  }, [partido, uf, dataVote, getColor, getTooltip])
+  }, [partido, uf, opacityById, getColor, getTooltip])
 
   useEffect(() => {
+    let cancelled = false
+
     if (uf)
       setLoading(true)
-    getData({ setGeoJSON, setDataJSON, uf })
-  }, [refresh])
+
+    getData({ setGeoJSON: (data) => { if (!cancelled) setGeoJSON(data) }, uf })
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => { cancelled = true }
+  }, [uf])
 
   useEffect(() => {
     setMapCenter({ mapRef, uf, geoJSON })
-  }, [geoJSON])
+  }, [geoJSON, uf])
 
   useEffect(() => {
-    setVotingData({ setdataVote, dataJSON, partido, uf })
-    setLoading(false)
-  }, [dataJSON])
+    setVotingData({ setdataVote, geoJSON, partido })
+  }, [geoJSON, partido])
 
   useEffect(() => {
     setUF(null)
-    setdataVote(null)
-    setRefresh(refresh + 1)
   }, [partido])
-
-  useEffect(() => {
-    setdataVote(null)
-    setRefresh(refresh + 1)
-  }, [uf])
 
   function MapFeatureGroup() {
     return (
-      dataVote === null ? null :
+      dataVote === null || !geoJSON ? null :
         <FeatureGroup>
           <GeoJSON data={geoJSON} onEachFeature={onEachState} />
         </FeatureGroup>

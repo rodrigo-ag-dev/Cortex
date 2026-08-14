@@ -65,59 +65,21 @@ const fetchZipGeoJson = async (url) => {
   return toFeatureCollection(parsed)
 }
 
-const findFeatureByCandidates = (collection, candidates = []) => {
+const findFeatureByCandidates = (collection, candidates = [], fields = null) => {
   const normalizedCandidates = candidates
     .map(normalizeText)
     .filter(Boolean)
 
   return collection?.features?.find((feature) => {
     const properties = feature?.properties ?? {}
-    return Object.values(properties).some((value) => normalizedCandidates.includes(normalizeText(value)))
+    const values = fields ? fields.map((field) => properties[field]) : Object.values(properties)
+    return values.some((value) => normalizedCandidates.includes(normalizeText(value)))
   }) ?? null
-}
-
-const collectPositions = (value, positions) => {
-  if (!Array.isArray(value)) {
-    return
-  }
-
-  if (value.length >= 2 && typeof value[0] === 'number' && typeof value[1] === 'number') {
-    positions.push([Number(value[0]), Number(value[1])])
-    return
-  }
-
-  for (const item of value) {
-    collectPositions(item, positions)
-  }
-}
-
-const geometryCenter = (geometry) => {
-  const positions = []
-  collectPositions(geometry?.coordinates, positions)
-
-  if (!positions.length) {
-    return null
-  }
-
-  let minX = positions[0][0]
-  let maxX = positions[0][0]
-  let minY = positions[0][1]
-  let maxY = positions[0][1]
-
-  for (const [x, y] of positions) {
-    if (x < minX) minX = x
-    if (x > maxX) maxX = x
-    if (y < minY) minY = y
-    if (y > maxY) maxY = y
-  }
-
-  return [(minX + maxX) / 2, (minY + maxY) / 2]
 }
 
 export {
   fetchZipGeoJson,
   findFeatureByCandidates,
-  geometryCenter,
   getMunicipiosZipUrl,
   getUfZipUrl,
   normalizeText,

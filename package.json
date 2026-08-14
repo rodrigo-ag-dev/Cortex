@@ -9,6 +9,7 @@
     "web": "npm run dev --prefix web",
     "web-build": "npm run build --prefix web",
     "web-install": "npm install --prefix web",
+    "build:data": "node ./server/scripts/build-data.mjs",
     "lint": "eslint . --ext js --ignore-pattern web --ignore-pattern node_modules --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
@@ -18,11 +19,11 @@
     "express": "^4.19.2",
     "express-rate-limit": "^8.6.2",
     "helmet": "^8.3.0",
-    "redis": "^4.6.13",
     "shpjs": "^6.2.0"
   },
   "devDependencies": {
     "eslint": "^8.56.0",
+    "mapshaper": "^0.7.52",
     "nodemon": "^3.1.0"
   }
 }
