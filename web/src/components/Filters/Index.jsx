@@ -10,6 +10,10 @@ const getUfValue = (label) => {
 export default ({ onChangeUF, onChangePartido, selectedUF }) => {
   return (
     <div className='panelLeft'>
+      <div className='panelLeft-header'>
+        <span className='panelLeft-title'>VotaBrasil</span>
+        <span className='panelLeft-badge'>Eleições 2014</span>
+      </div>
       <Select options={partidoList} placeholder='Partidos' onChange={values => onChangePartido(values)} />
       <Select options={ufList} placeholder='Estados' value={selectedUF} onChange={value => onChangeUF(value)} />
     </div>
