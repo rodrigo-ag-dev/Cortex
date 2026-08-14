@@ -55,7 +55,7 @@ for _ in $(seq 1 30); do
         echo "API pronta."
         echo "Tunnel: https://${tunnel_id}-${api_port}.brs.devtunnels.ms"
         echo "Pressione Ctrl+C para encerrar o tunnel e a API."
-        devtunnel host "${tunnel_id}"
+        devtunnel host "${tunnel_id}" --allow-anonymous
         exit $?
     fi
 

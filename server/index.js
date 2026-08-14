@@ -25,10 +25,10 @@ app.use(compression())
 app.use(express.json())
 app.use(cors({
   origin: (origin, callback) => {
-    // if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true)
-    // }
-    // return callback(new Error('Not allowed by CORS'))
+    }
+    return callback(new Error('Not allowed by CORS'))
   }
 }))
 app.use(limiter)
