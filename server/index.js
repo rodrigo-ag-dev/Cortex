@@ -32,7 +32,7 @@ app.use(cors({
   }
 }))
 app.use(limiter)
-app.use('/api/eleicao/2014/presidente/primeiro-turno/estados/', router)
+app.use('/api', router)
 
 app.listen(process.env.PORT || 5036, () => {
   console.log(`Server starting on port ${process.env.PORT || 5036}!`)

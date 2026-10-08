@@ -62,3 +62,6 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+
+# Cache de geometria do build-data (malha IBGE simplificada)
+server/src/data/cache/

@@ -8,18 +8,36 @@ const ufList = [
   { label: 'RN', value: 24 }, { label: 'PB', value: 25 }, { label: 'PE', value: 26 }
 ].sort((a, b) => (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0))
 
-const partidoList = [
-  { label: "PSDB", value: "PSDB", color: "#0080FF" },
-  { label: "PT", value: "PT", color: "#c4122d" },
-  { label: "PSB", value: "PSB", color: "#FFCC00" },
-  { label: "PSOL", value: "PSOL", color: "	#FFEE57" },
-  { label: "PV", value: "PV", color: "#006600" },
-  { label: "PSC", value: "PSC", color: "	#006f41" },
-  { label: "PRTB", value: "PRTB", color: "	#2cb53f" },
-  { label: "PSTU", value: "PSTU", color: "#c92127" },
-  { label: "PSDC", value: "PSDC", color: "#FFA500" },
-  { label: "PCB", value: "PCB", color: "#ff0000" },
-  { label: "PCO", value: "PCO", color: "#9F030A" }
-].sort((a, b) => (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0))
+// Cores por sigla partidaria (todas as eleicoes). Usado pelo build (meta.json) e pelo front.
+const partidoColors = {
+  PSDB: '#0080FF',
+  PT: '#c4122d',
+  PSB: '#FFCC00',
+  PSOL: '#FFEE57',
+  PV: '#006600',
+  PSC: '#006f41',
+  PRTB: '#2cb53f',
+  PSTU: '#c92127',
+  PSDC: '#FFA500',
+  PCB: '#ff0000',
+  PCO: '#9F030A',
+  PL: '#1B3F8B',
+  PSD: '#E6A100',
+  AVANTE: '#00A6A6',
+  'MISSÃO': '#7B2CBF',
+  NOVO: '#F26522',
+  DC: '#2E8B57',
+  UP: '#D6336C',
+  DEMOCRATA: '#8D6E63'
+}
 
-export { ufList, partidoList }
+const DEFAULT_PARTIDO_COLOR = '#888888'
+
+const getPartidoColor = (sigla) => partidoColors[sigla] ?? DEFAULT_PARTIDO_COLOR
+
+// Lista legada (eleicao 2014) mantida para compatibilidade com o front atual.
+const partidoList = ['PSDB', 'PT', 'PSB', 'PSOL', 'PV', 'PSC', 'PRTB', 'PSTU', 'PSDC', 'PCB', 'PCO']
+  .map((sigla) => ({ label: sigla, value: sigla, color: partidoColors[sigla] }))
+  .sort((a, b) => (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0))
+
+export { ufList, partidoList, partidoColors, getPartidoColor, DEFAULT_PARTIDO_COLOR }

@@ -1,0 +1,56 @@
+{
+  "ano": 2026,
+  "turno": 1,
+  "cargo": "presidente",
+  "titulo": "Eleições 2026 - 1º turno",
+  "partidos": [
+    {
+      "label": "PL",
+      "color": "#1B3F8B"
+    },
+    {
+      "label": "PT",
+      "color": "#c4122d"
+    },
+    {
+      "label": "AVANTE",
+      "color": "#00A6A6"
+    },
+    {
+      "label": "MISSÃO",
+      "color": "#7B2CBF"
+    },
+    {
+      "label": "PSD",
+      "color": "#E6A100"
+    },
+    {
+      "label": "NOVO",
+      "color": "#F26522"
+    },
+    {
+      "label": "UP",
+      "color": "#D6336C"
+    },
+    {
+      "label": "PSTU",
+      "color": "#c92127"
+    },
+    {
+      "label": "DC",
+      "color": "#2E8B57"
+    },
+    {
+      "label": "PCB",
+      "color": "#ff0000"
+    },
+    {
+      "label": "DEMOCRATA",
+      "color": "#8D6E63"
+    },
+    {
+      "label": "PCO",
+      "color": "#9F030A"
+    }
+  ]
+}

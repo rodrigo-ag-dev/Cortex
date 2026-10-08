@@ -7,12 +7,10 @@ Também tenho ciência que algumas skills, como implementação de testes, não 
 ## Requisitos necessários
 Você vai precisar ter algumas ferramentas/aplicativos instalados para uma avaliação funcional do projeto. No tópico Subindo o Ambiente de Avaliação, será descrito o passo a passo para e comandos necessários.
 - Nodejs: Recomendo a versão LTS mais atual;
-- Docker: Estas ferramentas vão por Redis online, é mais fácil de ser configurado e usado do que o WSL. Optei pelo Docker pois o Redis não tem versão para Windows, também aproveitei para a oportunidade para aprender sobre a tecnologia.
 
 ## Tecnologias Empregadas no Projeto
 O projeto emprega uma variedade de tecnologias, cada uma com um propósito específico:
 - Docker: Utilizado para a virtualização em containers, proporcionando um ambiente isolado e controlado para a execução do projeto.
-- Redis: Responsável pelo armazenamento de dados em memória, garantindo uma alta performance na recuperação de informações.
 - Javascript: A linguagem de programação adotada no desenvolvimento do projeto.
 - Node.js: Ambiente de execução do Javascript, comumente empregado em aplicações back-end.
 - Leaflet: Biblioteca Javascript dedicada à construção de ambientes de mapeamento interativos.
@@ -25,9 +23,17 @@ O projeto emprega uma variedade de tecnologias, cada uma com um propósito espec
 
 ## Detalhamento do Código (Back-end)
 O back-end do projeto foi desenvolvido em Nodejs com foco na eficiência e na escalabilidade. Seguem detalhes sobre a implementação:
-- A decisão de utilizar o Redis no back-end foi tomada para minimizar o tempo de resposta na entrega do GeoJSON das APIs do IBGE e evitar uma sobrecarga de requisições caso o front-end seja acessado por muitos usuários simultaneamente. Em resumo, a primeira leitura pode demorar um pouco, pois a busca é feita diretamente na API do IBGE. A partir desse momento, um cache é criado no Redis para cada GeoJSON recebido, tornando as requisições subsequentes mais rápidas e seguras. Implementei um tempo de vida de 7 dias para o cache. Após a leitura do cache, é feito uma verificação a data da última atualização e, se necessário, uma nova requisição é feita para a API do IBGE.
-- Como os dados iniciais estão em um arquivo texto, já aproveitei e o instanciei em uma chave dentro do redis, isso acontece toda vez que o serviço back-end é inicializado;
-- Como o objetivo solicitado atualmente é apenas as eleições de 2014, todo o processo foi escrito dentro de apenas uma classe chamada “eleicoes2014” e expus apenas três rotas para a API controlar, caso seja necessário expor outras eleições o controle de qual ano está sendo requirido deve ser enviado via params, assim não perdemos as rotas atuais e conseguimos controlar melhor novas implementações;
+- Os dados são pré-processados por scripts de build em `server/src/data/generated/{ano}-{turno}/` (`meta.json`, `estados.json` e `municipios/{UF}.json`, GeoJSON com geometria já simplificada). No boot, o controller `server/src/controllers/eleicoes.js` varre essas pastas e mantém tudo em memória; não há Redis nem chamadas ao IBGE em tempo de execução.
+- CORS restrito às origens de `ALLOWED_ORIGINS` (separadas por vírgula). GeoJSON responde com `Cache-Control: public, max-age=604800, immutable` (o ano está na URL); `/api/eleicoes` e `/meta` com `max-age=300`.
+
+### Rotas da API
+`:turno` aceita `1`/`2` ou `primeiro-turno`/`segundo-turno`; `:uf` aceita sigla (`SP`) ou código IBGE (`35`). Eleição ou UF inexistente retorna 404 com `{ "mensagem": "..." }`.
+- `GET /api/eleicoes` — lista `[{ ano, turno, cargo, titulo }]` ordenada;
+- `GET /api/eleicao/:ano/presidente/:turno/meta` — metadados e partidos (`{ ano, turno, cargo, titulo, partidos: [{ label, color }] }`);
+- `GET /api/eleicao/:ano/presidente/:turno/estados` — FeatureCollection de todos os estados;
+- `GET /api/eleicao/:ano/presidente/:turno/estados/:uf` — FeatureCollection com o estado;
+- `GET /api/eleicao/:ano/presidente/:turno/estados/:uf/municipios` — FeatureCollection dos municípios da UF;
+- Legado: `/api/eleicao/2014/presidente/primeiro-turno/estados/...` continua funcionando (equivale a 2014, 1º turno).
 
 ## Detalhamento do Código (Front-end)
 O front-end do projeto foi desenvolvido com foco na experiência do usuário e a estruturação do código fonte permitindo uma fácil implementação de novos recursos. Seguem detalhes sobre a implementação:
@@ -40,15 +46,14 @@ O front-end do projeto foi desenvolvido com foco na experiência do usuário e a
 
 ## Subindo o ambiente para avaliação
 Os passos a seguir são necessários para colocar o ambiente online e assim visualizar o projeto rodando. Para facilitar o uso e garantir que os serviços vão ficar rodando abra um terminal (CMD, Powershell, ...) para cada ação:
-- Docker: crie um ambiente para o Redis.
-  - Docker pull redis, instancie um container expondo a porta 6379; 
 - Para colocar o servidor online; abra um terminal (CMD, Powershell, ...) e a partir da pasta server execute o comando abaixo:
   - npm install (este comando deve ser executado apenas uma vez pois ele é responsável por instalar as dependencias)
   - npm run start (responsável por iniciar o servidor)
+- Front: configure `web/.env` (copie de `web/.env.example`) com `VITE_API_URL` apontando para a raiz da API (ex.: `http://localhost:5036/api`). O front lista as eleições em `/api/eleicoes` e permite trocar de eleição pelo seletor;
 - Abra um novo terminal e a partir da pasta web execute o comando abaixo:
   - npm install (este comando deve ser executado apenas uma vez pois ele é responsável por instalar as dependencias)
   - npm run start (responsável por iniciar o serviço web)
-- Em seu navegador entre com o endereço <http://localhost:5173/eleicoes-2014/> ou use o Ctrl + clique sobre o endereço que o vite disponibilizou;
+- Em seu navegador abra o endereço que o Vite disponibilizar no terminal;
 - Use o SPA a vontade;
 
 ## Conclusão
@@ -57,7 +62,7 @@ Agradeço a oportunidade de trabalhar neste projeto e estou ansioso para continu
 # **Agradecimentos**
 Eu quero deixar registrado aqui meu relato sobre este momento.
 Na última semana estudei e aprendi sobre muitos recursos que até o então só ouvi falar.
-Docker, WSL, Leaflet, GeoJSON, Redis, montar estruturas JSON de grande porte, ...
+Docker, WSL, Leaflet, GeoJSON, montar estruturas JSON de grande porte, ...
 Isso criou uma marca em mim e me trouxe lembranças muito agradáveis do inicio de minha carreia onde dar o meu melhor valeu muito a pena.
 Obrigado pela oportunidade e pelas lembranças.
 Espero de verdade fazer parte desse time e poder contribuir muito, fazendo algo que eu amo.

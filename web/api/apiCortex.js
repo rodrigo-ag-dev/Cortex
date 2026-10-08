@@ -1,30 +1,40 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/eleicao/2014/presidente/primeiro-turno/estados'
+// VITE_API_URL deve apontar para a raiz da API (ex.: http://localhost:5000/api).
+// Por compatibilidade, se vier no formato antigo (com /eleicao/... no final), o sufixo é removido.
+const resolveApiRoot = (url) => {
+  const raw = (url || 'http://localhost:5000/api').trim()
+  return raw.replace(/\/eleicao(\/.*)?$/i, '').replace(/\/+$/, '')
+}
+
+const API_ROOT = resolveApiRoot(import.meta.env.VITE_API_URL)
 
 const apiCortex = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_ROOT,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 15000
+  timeout: 120000
 })
 
-apiCortex.defaults.timeout = 120000
+const eleicaoPath = ({ ano, turno }) => `/eleicao/${ano}/presidente/${turno}`
 
-apiCortex.interceptors.response.use(response => {
-  return response;
-}, (error) => {
-  return Promise.reject(error);
-})
+// [{ ano, turno, cargo, titulo }]
+const listEleicoes = async () => {
+  const { data } = await apiCortex.get('/eleicoes')
+  return Array.isArray(data) ? data : []
+}
 
-apiCortex.interceptors.request.use(request => {
-  //Caso seja necessário implementar um controle de acesso a API
-  //if (!request.headers || !request.headers.authorization) {
-  //  const token = localStorage.getItem('token')
-  //  request.headers.authorization = `Bearer ${token}`
-  //}
-  return request;
-}, (error) => {
-  return Promise.reject(error);
-})
+// { ano, turno, cargo, titulo, partidos: [{ label, color }] }
+const getMeta = async (eleicao) => {
+  const { data } = await apiCortex.get(`${eleicaoPath(eleicao)}/meta`)
+  return data
+}
 
+// GeoJSON de estados (sem uf) ou de municípios da uf informada (sigla)
+const getGeo = async (eleicao, uf) => {
+  const base = `${eleicaoPath(eleicao)}/estados`
+  const { data } = await apiCortex.get(uf ? `${base}/${uf}/municipios` : base)
+  return data
+}
+
+export { API_ROOT, listEleicoes, getMeta, getGeo }
 export default apiCortex

@@ -6,6 +6,6 @@ import Mapa from './components/Mapa/Index.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Mapa id="Eleições2014" />
+    <Mapa />
   </React.StrictMode>
 )

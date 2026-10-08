@@ -1,0 +1,52 @@
+{
+  "ano": 2014,
+  "turno": 1,
+  "cargo": "presidente",
+  "titulo": "Eleições 2014 - 1º turno",
+  "partidos": [
+    {
+      "label": "PT",
+      "color": "#c4122d"
+    },
+    {
+      "label": "PSDB",
+      "color": "#0080FF"
+    },
+    {
+      "label": "PSB",
+      "color": "#FFCC00"
+    },
+    {
+      "label": "PSOL",
+      "color": "#FFEE57"
+    },
+    {
+      "label": "PSC",
+      "color": "#006f41"
+    },
+    {
+      "label": "PV",
+      "color": "#006600"
+    },
+    {
+      "label": "PRTB",
+      "color": "#2cb53f"
+    },
+    {
+      "label": "PSTU",
+      "color": "#c92127"
+    },
+    {
+      "label": "PSDC",
+      "color": "#FFA500"
+    },
+    {
+      "label": "PCB",
+      "color": "#ff0000"
+    },
+    {
+      "label": "PCO",
+      "color": "#9F030A"
+    }
+  ]
+}
