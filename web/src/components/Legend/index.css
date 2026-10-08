@@ -18,6 +18,17 @@
    color: #222222;
 }
 
+.legend-title--split {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+}
+
+.legend-vs {
+   color: #888888;
+   font-weight: 400;
+}
+
 .legend-bar {
    height: 10px;
    border-radius: 5px;

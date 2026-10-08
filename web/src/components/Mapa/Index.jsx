@@ -2,12 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FeatureGroup, GeoJSON, MapContainer } from 'react-leaflet'
 import { getPartidoColor } from '../../../../common/lists.mjs'
 import { getMeta, listEleicoes } from '../../../api/apiCortex.js'
+import ComparisonSummary from '../ComparisonSummary/Index.jsx'
 import Filter, { getUfValue } from '../Filters/Index.jsx'
 import Legend from '../Legend/Index.jsx'
 import Loading from '../Loading/Index.jsx'
+import { getComparisonColors, getDivergingColor, NEUTRAL_COLOR } from './comparisonColors.js'
+import { formatPct, formatPP, formatVotes, winnerLabel } from './formatNumber.js'
 import getData from './getData.js'
 import getOpacityByVote from './getOpacityByVote.js'
 import './index.css'
+import setComparisonData from './setComparisonData.js'
 import setMapCenter, { latlngBrazil } from './setMapCenter.js'
 import setVotingData from './setVotingData.js'
 
@@ -36,6 +40,9 @@ function Mapa() {
   const [meta, setMeta] = useState(null)
   const [uf, setUF] = useState(null)
   const [partido, setPartido] = useState(null)
+  const [modo, setModo] = useState('partido')
+  const [partidoA, setPartidoA] = useState(null)
+  const [partidoB, setPartidoB] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [geoJSON, setGeoJSON] = useState(null)
@@ -49,6 +56,26 @@ function Mapa() {
   }, [meta, geoJSON])
 
   const titulo = meta?.titulo || eleicao?.titulo || (eleicao ? `Eleições ${eleicao.ano}` : '')
+
+  const comparison = useMemo(() => modo === 'comparar'
+    ? setComparisonData({ geoJSON, siglaA: partidoA?.value, siglaB: partidoB?.value })
+    : null, [modo, geoJSON, partidoA, partidoB])
+
+  const compareColors = useMemo(() => {
+    const colorOf = (p) => partidoOptions.find(e => e.value === p?.value)?.color || p?.color || '#888888'
+    return getComparisonColors(colorOf(partidoA), colorOf(partidoB))
+  }, [partidoA, partidoB, partidoOptions])
+
+  const compareFillById = useMemo(() => {
+    const map = new Map()
+    if (comparison) {
+      const { maxMargin } = comparison.summary
+      comparison.byId.forEach((e, id) => map.set(id, getDivergingColor({ margin: e.margin, maxMargin, ...compareColors })))
+    }
+    return map
+  }, [comparison, compareColors])
+
+  const isPainting = modo === 'comparar' ? !!comparison : !!partido
 
   const getColor = useCallback(() => {
     const found = partidoOptions.find(e => e.label === partido?.label)
@@ -73,39 +100,50 @@ function Mapa() {
 
   const getTooltip = useCallback(({ dados }) => {
     let tooltip = `<div>${dados.name} - ${dados.uf}</div>`
+    if (comparison) {
+      const c = comparison.byId.get(dados.id)
+      if (!c)
+        return tooltip
+      const { colorA, colorB } = compareColors
+      const linha = (label, color, votes, pct) =>
+        `<div class='map-tooltip-row'><span><i class='map-tooltip-dot' style='background:${color}'></i>${label}</span><span>${formatVotes(votes)} (${formatPct(pct)})</span></div>`
+      tooltip += linha(partidoA.label, colorA, c.votesA, c.pctA)
+      tooltip += linha(partidoB.label, colorB, c.votesB, c.pctB)
+      tooltip += `<div class='map-tooltip-row'><span>Diferença</span><span>${formatPP(c.margin)}</span></div>`
+      tooltip += `<div class='map-tooltip-winner'>Vencedor: ${winnerLabel(c.winner, partidoA.label, partidoB.label)}</div>`
+      return `<div>${tooltip}</div>`
+    }
     if (partido) {
       const vote = voteById.get(dados.id)?.vote ?? 0
       tooltip += `<div class='map-tooltip-value'>${vote.toLocaleString('pt-BR')}</div>`
       tooltip = `<div>${tooltip}</div>`
     }
     return tooltip
-  }, [partido, voteById])
+  }, [partido, voteById, comparison, compareColors, partidoA, partidoB])
 
   const onEachState = useCallback((feature, layer) => {
-    const fillColor = partido ? getColor() : '#D6DAC2'
+    const { id } = feature.properties.dados
+    const fillColor = comparison ? (compareFillById.get(id) || NEUTRAL_COLOR) : partido ? getColor() : '#D6DAC2'
+    const getFillOpacity = () => comparison ? 0.85 : getOpacityByVote({ opacityById, id })
 
     layer.on('mouseover', function () {
       this.setStyle({ 'fillColor': '#444444AA', fillOpacity: 1 })
     })
 
     layer.on('mouseout', function () {
-      const { id } = feature.properties.dados
-      const fillOpacity = getOpacityByVote({ opacityById, id })
-      this.setStyle({ fillColor, fillOpacity })
+      this.setStyle({ fillColor, fillOpacity: getFillOpacity() })
     })
 
     layer.on('click', function () {
-      if (partido && !uf) {
+      if (isPainting && !uf) {
         setUF(null)
         setUF(getUfValue(feature.properties.dados.uf))
       }
     })
 
-    const { id } = feature.properties.dados
-    const fillOpacity = getOpacityByVote({ opacityById, id })
-    layer.setStyle({ fillColor, fillOpacity, weight: uf ? .2 : .5, color: '#000000' });
+    layer.setStyle({ fillColor, fillOpacity: getFillOpacity(), weight: uf ? .2 : .5, color: '#000000' });
     layer.bindTooltip(getTooltip(feature.properties), { direction: 'top', sticky: true })
-  }, [partido, uf, opacityById, getColor, getTooltip])
+  }, [partido, uf, opacityById, getColor, getTooltip, comparison, compareFillById, isPainting])
 
   // Lista de eleições; seleciona a mais recente
   useEffect(() => {
@@ -175,7 +213,7 @@ function Mapa() {
 
   function MapFeatureGroup() {
     return (
-      dataVote === null || !geoJSON ? null :
+      !geoJSON || (modo === 'comparar' ? !comparison : dataVote === null) ? null :
         <FeatureGroup>
           <GeoJSON data={geoJSON} onEachFeature={onEachState} />
         </FeatureGroup>
@@ -191,9 +229,27 @@ function Mapa() {
       return
     setUF(null)
     setPartido(null)
+    setPartidoA(null)
+    setPartidoB(null)
     setdataVote(null)
     setGeoJSON(null)
     setEleicao(option)
+  }
+
+  const onChangeModo = (value) => {
+    setUF(null)
+    setModo(value)
+  }
+
+  const onChangePartidoComparado = (setter) => (value) => {
+    if (!value)
+      setUF(null)
+    setter(value)
+  }
+
+  const onSwapPartidos = () => {
+    setPartidoA(partidoB)
+    setPartidoB(partidoA)
   }
 
   return (
@@ -204,10 +260,15 @@ function Mapa() {
         selectedUF={uf} onChangeUF={value => {
           setUF(null)
 
-          if (partido)
+          if (isPainting)
             setUF(value)
         }}
         selectedPartido={partido} onChangePartido={value => setPartido(value)}
+        modo={modo} onChangeModo={onChangeModo}
+        partidoA={partidoA} partidoB={partidoB}
+        onChangePartidoA={onChangePartidoComparado(setPartidoA)}
+        onChangePartidoB={onChangePartidoComparado(setPartidoB)}
+        onSwapPartidos={onSwapPartidos}
       />
       <MapContainer
         zoom={5}
@@ -222,7 +283,12 @@ function Mapa() {
       </MapContainer>
       <MapLoading />
       {error ? <div className="map-error" role="alert">{error}</div> : null}
-      <Legend partido={partido} dataVote={dataVote} />
+      {comparison ?
+        <div className='compare-dock'>
+          <Legend comparison={comparison} partidoA={partidoA} partidoB={partidoB} {...compareColors} />
+          <ComparisonSummary comparison={comparison} partidoA={partidoA} partidoB={partidoB} uf={uf} {...compareColors} />
+        </div> :
+        modo === 'partido' ? <Legend partido={partido} dataVote={dataVote} /> : null}
     </>
   )
 }

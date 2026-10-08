@@ -1,0 +1,27 @@
+.compare {
+   display: flex;
+   flex-direction: column;
+}
+
+.compare-swap {
+   align-self: center;
+   margin: -4px 0 6px;
+   padding: 3px 12px;
+   font: inherit;
+   font-size: 12px;
+   font-weight: 600;
+   color: #000077;
+   background: rgba(0, 0, 119, 0.08);
+   border: none;
+   border-radius: 999px;
+   cursor: pointer;
+}
+
+.compare-swap:hover:not(:disabled) {
+   background: rgba(0, 0, 119, 0.16);
+}
+
+.compare-swap:disabled {
+   opacity: 0.4;
+   cursor: default;
+}
