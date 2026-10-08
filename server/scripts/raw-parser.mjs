@@ -5,7 +5,7 @@
 // Formatos suportados:
 //   2014 UF:  ["UF", sigla, nome, sigla, cand...]                       (cand a partir do indice 4)
 //   2014 MU:  [nome, IBGE7, "MU", TSE5, nomeUF, sigla, cand...]         (cand a partir do indice 6)
-//   2026 MU:  ["MUNICIPIO", TSE5, nome, sigla, nomeUF, cand...]         (cand a partir do indice 5)
+//   2022/2026 MU: ["MUNICIPIO", TSE5, nome, sigla, nomeUF, cand...]         (cand a partir do indice 5)
 // Tupla de candidato: [partido, nome, votos, pct, flag("S"/"N")].
 // Linhas da UF 'ZZ' (exterior) e linhas desconhecidas (ex.: "Brasil") sao ignoradas.
 

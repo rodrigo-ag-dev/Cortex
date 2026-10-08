@@ -1,0 +1,52 @@
+{
+  "ano": 2022,
+  "turno": 1,
+  "cargo": "presidente",
+  "titulo": "Eleições 2022 - 1º turno",
+  "partidos": [
+    {
+      "label": "PT",
+      "color": "#c4122d"
+    },
+    {
+      "label": "PL",
+      "color": "#1B3F8B"
+    },
+    {
+      "label": "MDB",
+      "color": "#7CB342"
+    },
+    {
+      "label": "PDT",
+      "color": "#8E24AA"
+    },
+    {
+      "label": "UNIÃO",
+      "color": "#00AEEF"
+    },
+    {
+      "label": "NOVO",
+      "color": "#F26522"
+    },
+    {
+      "label": "PTB",
+      "color": "#5D4037"
+    },
+    {
+      "label": "UP",
+      "color": "#D6336C"
+    },
+    {
+      "label": "PCB",
+      "color": "#ff0000"
+    },
+    {
+      "label": "PSTU",
+      "color": "#c92127"
+    },
+    {
+      "label": "DC",
+      "color": "#2E8B57"
+    }
+  ]
+}

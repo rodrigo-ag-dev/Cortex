@@ -28,7 +28,12 @@ const partidoColors = {
   NOVO: '#F26522',
   DC: '#2E8B57',
   UP: '#D6336C',
-  DEMOCRATA: '#8D6E63'
+  DEMOCRATA: '#8D6E63',
+  // 2022
+  MDB: '#7CB342',
+  PDT: '#8E24AA',
+  'UNIÃO': '#00AEEF',
+  PTB: '#5D4037'
 }
 
 const DEFAULT_PARTIDO_COLOR = '#888888'
