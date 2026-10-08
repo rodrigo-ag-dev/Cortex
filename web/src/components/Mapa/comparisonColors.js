@@ -1,6 +1,8 @@
 const NEUTRAL_COLOR = '#EEEEE8'
 const MIN_COLOR_DISTANCE = 160
-const CONTRAST_COLORS = ['#F26522', '#00A6A6', '#7B2CBF', '#2E8B57', '#D6336C', '#1B3F8B', '#E6A100', '#c4122d']
+// Cor alternativa de B quando A e B são parecidas: roxo; se A também for parecida com o roxo, laranja
+const ALT_COLOR_B = '#7B1FA2'
+const ALT_COLOR_B_FALLBACK = '#F57C00'
 
 const parseHex = (hex) => {
   let value = String(hex || '').replace('#', '').slice(0, 6)
@@ -23,12 +25,19 @@ const colorDistance = (c1, c2) => {
   return Math.sqrt((2 + rm / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rm) / 256) * db * db)
 }
 
-// Mantém a cor de A; se B for parecida demais com A, usa a cor de contraste mais distante
+// Mantém a cor de A; se B for parecida demais com A, B vira roxo (ou laranja, se A for parecida com o roxo)
 const getComparisonColors = (colorA, colorB) => {
   if (colorDistance(colorA, colorB) >= MIN_COLOR_DISTANCE)
     return { colorA, colorB, contrast: false }
 
-  const best = CONTRAST_COLORS.reduce((acc, c) => colorDistance(colorA, c) > colorDistance(colorA, acc) ? c : acc)
+  if (colorDistance(colorA, ALT_COLOR_B) >= MIN_COLOR_DISTANCE)
+    return { colorA, colorB: ALT_COLOR_B, contrast: true }
+
+  if (colorDistance(colorA, ALT_COLOR_B_FALLBACK) >= MIN_COLOR_DISTANCE)
+    return { colorA, colorB: ALT_COLOR_B_FALLBACK, contrast: true }
+
+  // Salvaguarda: nenhuma das duas atinge o limiar; usa a mais distante de A
+  const best = colorDistance(colorA, ALT_COLOR_B) >= colorDistance(colorA, ALT_COLOR_B_FALLBACK) ? ALT_COLOR_B : ALT_COLOR_B_FALLBACK
   return { colorA, colorB: best, contrast: true }
 }
 
