@@ -1,0 +1,16 @@
+{
+  "ano": 2026,
+  "turno": 2,
+  "cargo": "presidente",
+  "titulo": "Eleições 2026 - 2º turno",
+  "partidos": [
+    {
+      "label": "PT",
+      "color": "#c4122d"
+    },
+    {
+      "label": "PL",
+      "color": "#1B3F8B"
+    }
+  ]
+}
